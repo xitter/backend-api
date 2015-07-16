@@ -12,7 +12,10 @@ libraryDependencies ++= Seq(
   javaEbean,
   cache,
   "mysql" % "mysql-connector-java" % "5.1.18",
-  "org.elasticsearch" % "elasticsearch" % "1.2.1"
+  "org.elasticsearch" % "elasticsearch" % "1.2.1",
+  "com.restfb" % "restfb" % "1.8.0",
+  "com.fasterxml.jackson.jaxrs" % "jackson-jaxrs-json-provider" % "2.5.2",
+  "org.projectlombok" % "lombok" % "1.16.2"
 )
 
 play.Project.playJavaSettings
