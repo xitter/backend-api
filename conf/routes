@@ -5,5 +5,15 @@
 # Home page
 GET     /                           controllers.Application.index()
 
+# Home page
+GET     /locality                           controllers.Application.getLocality()
+
+# Home page
+GET     /login                           controllers.Application.login(mobile,latitude,longitude)
+GET     /register                           controllers.Application.register(name,mobile,latitude,longitude)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+GET     /createEvent              controllers.EventController.createEvent(name,people,latitude, longitude)
+GET     /updateStatus              controllers.EventController.updateStatus(uid:Long, eid:Long, latitude, longitude, accept:Boolean)
