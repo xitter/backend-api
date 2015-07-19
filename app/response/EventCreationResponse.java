@@ -16,4 +16,7 @@ public class EventCreationResponse {
 
     @Getter
     List<String> notRegistered;
+
+    @Getter
+    List<String> alreadyJoined;
 }

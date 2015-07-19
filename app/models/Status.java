@@ -36,10 +36,12 @@ public class Status extends Model {
 
     @Column(name = "latitude")
     @Getter
+    @Setter
     private String latitude;
 
     @Column(name = "longitude")
     @Getter
+    @Setter
     private String longitude;
 
     public enum Type{
