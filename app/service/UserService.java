@@ -4,6 +4,8 @@ import com.avaje.ebean.EbeanServer;
 import models.User;
 
 import javax.persistence.OptimisticLockException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by vijay on 18/7/15.
@@ -19,6 +21,11 @@ public class UserService {
     public User getUser(String mobile) {
         User user = database.find(User.class).where().eq("mobile", mobile).findUnique();
         return user;
+    }
+
+    public List<User> getUsers(Set<Long> ids) {
+        List<User> users = database.find(User.class).where().in("id",ids).findList();
+        return users;
     }
 
     public User login(String mobile, String latitude, String longitude) {

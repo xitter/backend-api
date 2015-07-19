@@ -18,7 +18,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "event_status")
 @AllArgsConstructor
-public class Status extends Model {
+public class EventMember extends Model {
 
     @Id
     @Column(name = "eid")
@@ -32,7 +32,7 @@ public class Status extends Model {
     @Column(name = "status")
     @Getter
     @Setter
-    private Type status;
+    private Status status;
 
     @Column(name = "latitude")
     @Getter
@@ -44,7 +44,7 @@ public class Status extends Model {
     @Setter
     private String longitude;
 
-    public enum Type{
+    public enum Status{
             @EnumValue("1")
             accepted,
             @EnumValue("2")

@@ -34,4 +34,9 @@ public class EventController extends Controller {
         return ok();
     }
 
+    public static Result getEvent( Long uid, Long eid, String latitude, String longitude, Boolean accept){
+        EventService eventService = new EventService();
+        eventService.updateEventStatus(uid,eid, latitude, longitude,accept );
+        return ok();
+    }
 }

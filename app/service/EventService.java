@@ -1,15 +1,14 @@
 package service;
 
+import bean.Member;
 import com.avaje.ebean.EbeanServer;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import models.Event;
-import models.Status;
+import models.EventMember;
 import models.User;
 import response.EventCreationResponse;
+import response.EventResponse;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vijay on 18/7/15.
@@ -35,16 +34,16 @@ public class EventService {
 
         List<String> notRegistered = new ArrayList();
         List<String> alreadyJoined = new ArrayList();
-        List<Status> newMembers = new ArrayList<Status>();
+        List<EventMember> newMembers = new ArrayList<EventMember>();
         for (int i = 0; i < mobiles.size(); i++) {
             User user = userService.getUser(mobiles.get(i));
             if (i == 0) {
-                newMembers.add(new Status(event.getId(), user.getId(), Status.Type.accepted, latitude, longitude));
+                newMembers.add(new EventMember(event.getId(), user.getId(), EventMember.Status.accepted, latitude, longitude));
             } else {
                 if (null == user)
                     notRegistered.add(mobiles.get(i));
                 else {
-                    newMembers.add(new Status(event.getId(), user.getId(), Status.Type.pending, null, null));
+                    newMembers.add(new EventMember(event.getId(), user.getId(), EventMember.Status.pending, null, null));
                 }
             }
         }
@@ -63,7 +62,7 @@ public class EventService {
             if (null == user)
                 notRegistered.add(mobiles.get(i));
             else {
-                database.save(new Status(event.getId(), user.getId(), Status.Type.pending, null, null));
+                database.save(new EventMember(event.getId(), user.getId(), EventMember.Status.pending, null, null));
             }
         }
         return new EventCreationResponse(event.getId(), notRegistered, alreadyJoined);
@@ -77,30 +76,29 @@ public class EventService {
                 //TodO: add exception
             }
 
-            int acceptedMemberCount = database.find(Status.class).where().
+            int acceptedMemberCount = database.find(EventMember.class).where().
                     eq("eid", event.getId()).
                     eq("status", 1).findRowCount();
 
-            Status status = database.find(Status.class).where().eq("uid", userId).eq("eid", eventId).findUnique();
+            EventMember member = database.find(EventMember.class).where().eq("uid", userId).eq("eid", eventId).findUnique();
 
-            Status.Type oldStatus = null;
+            EventMember.Status oldStatus = null;
             Float oldStatusLatitude = null, oldStatusLongitude = null,
                     newEventLongitude = 0F, newEventLatitude = 0F;
 
 
-            if (null == status) {
-                status = new Status(eventId, userId, Status.Type.accepted, latitude, longitude);
+            if (null == member) {
+                member = new EventMember(eventId, userId, null, null, null);
             } else {
-                oldStatus = status.getStatus();
-                oldStatusLatitude = null == status.getLatitude() ? null : Float.parseFloat(status.getLatitude());
-                oldStatusLongitude = null == status.getLongitude() ? null : Float.parseFloat(status.getLongitude());
-                status.setLatitude(latitude);
-                status.setLongitude(longitude);
+                oldStatus = member.getStatus();
+                oldStatusLatitude = null == member.getLatitude() ? null : Float.parseFloat(member.getLatitude());
+                oldStatusLongitude = null == member.getLongitude() ? null : Float.parseFloat(member.getLongitude());
             }
-
+            member.setLatitude(latitude);
+            member.setLongitude(longitude);
             if (accept) {
-                status.setStatus(Status.Type.accepted);
-                if (null != oldStatus && oldStatus.compareTo(Status.Type.accepted) == 0) {
+                member.setStatus(EventMember.Status.accepted);
+                if (null != oldStatus && oldStatus.compareTo(EventMember.Status.accepted) == 0) {
                     newEventLatitude = (Float.parseFloat(event.getLatitude()) * acceptedMemberCount - oldStatusLatitude + Float.parseFloat(latitude)) / acceptedMemberCount;
                     newEventLongitude = (Float.parseFloat(event.getLongitude()) * acceptedMemberCount - oldStatusLongitude + Float.parseFloat(longitude)) / acceptedMemberCount;
                 } else {
@@ -109,19 +107,19 @@ public class EventService {
                 }
 
             } else {
-                if (null != oldStatus && oldStatus.compareTo(Status.Type.accepted) == 0) {
+                if (null != oldStatus && oldStatus.compareTo(EventMember.Status.accepted) == 0) {
                     newEventLatitude = (Float.parseFloat(event.getLatitude()) * acceptedMemberCount - oldStatusLatitude) / (acceptedMemberCount - 1);
                     newEventLongitude = (Float.parseFloat(event.getLongitude()) * acceptedMemberCount - oldStatusLongitude) / (acceptedMemberCount - 1);
                 }
-                status.setStatus(Status.Type.rejected);
+                member.setStatus(EventMember.Status.rejected);
             }
 
             event.setLatitude(newEventLatitude.toString());
             event.setLongitude(newEventLongitude.toString());
             if (null != oldStatus) {
-                database.update(status);
+                database.update(member);
             } else {
-                database.save(status);
+                database.save(member);
             }
             database.update(event);
             database.commitTransaction();
@@ -134,21 +132,36 @@ public class EventService {
         return database.find(Event.class, id);
     }
 
-//    private void updateEventLocation(Long userId, Event event, String latitude, String longitude, Boolean accept) {
-//        Float newLongitude = 0F, newLatitude = 0F,
-//                curLongitude = Float.parseFloat(event.getLongitude()),
-//                curLatitude = Float.parseFloat(event.getLatitude());
-//
-//        Status status = database.find(Status.class).where().
-//                eq("eid", event.getId()).
-//                eq("status", 1).
-//                eq("uid", userId).findUnique();
-//
-//        if (accept) {
-//            if (null != status.getLatitude())
-//        }
-//        event.setLatitude(centroidX.toString());
-//        event.setLongitude(centroidY.toString());
-//        database.update(event);
-//    }
+    public EventResponse getEventDetails(Long id) {
+
+        Event event = findEvent(id);
+
+        List<EventMember> eventMembers = database.find(EventMember.class)
+                .where().eq("eid", event.getId())
+                .findList();
+
+        Set<Long> memberIds = new HashSet<Long>();
+        Map<Long, EventMember.Status> memberStatus = new HashMap<Long, EventMember.Status>();
+        for (EventMember eventMember : eventMembers) {
+            memberIds.add(eventMember.getUserId());
+            memberStatus.put(eventMember.getUserId(), eventMember.getStatus());
+        }
+
+        UserService userService = new UserService();
+        List<User> users = userService.getUsers(memberIds);
+
+        List<Member> members = new ArrayList<Member>();
+        for (User user : users) {
+            members.add(
+                    new Member(user.getId(),
+                            user.getName(),
+                            user.getMobile(),
+                            memberStatus.get(user.getId()),
+                            user.getLatitude(),
+                            user.getLongitude()));
+        }
+
+        return new EventResponse(event.getId(), event.getName(), members);
+    }
+
 }
