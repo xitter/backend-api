@@ -16,4 +16,5 @@ GET     /register                           controllers.Application.register(nam
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 GET     /createEvent              controllers.EventController.createEvent(name,people,latitude, longitude)
+GET     /getEvent/:id                   controllers.EventController.getEvent(id:Long)
 GET     /updateStatus              controllers.EventController.updateStatus(uid:Long, eid:Long, latitude, longitude, accept:Boolean)

@@ -20,7 +20,6 @@ import javax.persistence.Table;
 @AllArgsConstructor
 public class EventMember extends Model {
 
-    @Id
     @Column(name = "eid")
     @Getter
     private Long eventId;

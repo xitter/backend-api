@@ -21,22 +21,21 @@ public class EventController extends Controller {
         );
     }
 
-    public static Result createEvent( String name, String people, String latitude, String longitude){
+    public static Result createEvent(String name, String people, String latitude, String longitude) {
         EventService eventService = new EventService();
         List<String> mobileNos = Arrays.asList(people.split(","));
-        EventCreationResponse eventCreationResponse = eventService.createEvent(name,mobileNos, latitude, longitude );
+        EventCreationResponse eventCreationResponse = eventService.createEvent(name, mobileNos, latitude, longitude);
         return ok(Json.toJson(eventCreationResponse));
     }
 
-    public static Result updateStatus( Long uid, Long eid, String latitude, String longitude, Boolean accept){
+    public static Result updateStatus(Long uid, Long eid, String latitude, String longitude, Boolean accept) {
         EventService eventService = new EventService();
-        eventService.updateEventStatus(uid,eid, latitude, longitude,accept );
+        eventService.updateEventStatus(uid, eid, latitude, longitude, accept);
         return ok();
     }
 
-    public static Result getEvent( Long uid, Long eid, String latitude, String longitude, Boolean accept){
+    public static Result getEvent(Long id) {
         EventService eventService = new EventService();
-        eventService.updateEventStatus(uid,eid, latitude, longitude,accept );
-        return ok();
+        return ok(Json.toJson(eventService.getEventDetails(id)));
     }
 }
