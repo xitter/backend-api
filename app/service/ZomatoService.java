@@ -15,8 +15,8 @@ public class ZomatoService {
         return RestService.sendGet(ZOMATO_API_PREFIX + "geocode.json?lat=" + lat + "&lon=" + lon, ZOMATO_API_AUTH_HEADER, ZOMATO_API_KEY);
     }
 
-    public static void getSuggestions(String lat, String lon) throws Exception {
-    //    return RestService.sendGet(ZOMATO_API_PREFIX + "geocode.json?lat=" + lat + "&lon=" + lon, ZOMATO_API_AUTH_HEADER, ZOMATO_API_KEY);
+    public static Object getSuggestions(String lat, String lon, Integer count) throws Exception {
+        return RestService.sendGet(ZOMATO_API_PREFIX + "search.json?lat=" + lat + "&lon=" + lon + "&count=" + count, ZOMATO_API_AUTH_HEADER, ZOMATO_API_KEY);
     }
 }
 

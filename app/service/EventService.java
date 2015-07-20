@@ -128,7 +128,7 @@ public class EventService {
         }
     }
 
-    private Event findEvent(Long id) {
+    public Event findEvent(Long id) {
         return database.find(Event.class, id);
     }
 
