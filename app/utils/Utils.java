@@ -18,13 +18,35 @@ public class Utils {
     }
 
     public static Location centroid(List<Location> locations) {
-        double centroidX = 0, centroidY = 0;
 
-        for (Location knot : locations) {
-            centroidX += knot.getLatitude();
-            centroidY += knot.getLongitude();
+        int locationCount = locations.size();
+
+        if (locationCount == 1) {
+            return locations.get(0);
         }
-        return new Location(centroidX / locations.size(), centroidY / locations.size());
+
+        double x = 0, y = 0, z = 0;
+
+        for (Location location : locations) {
+
+            double latitude = location.getLatitude() * Math.PI / 180;
+            double longitude = location.getLongitude() * Math.PI / 180;
+
+            x += Math.cos(latitude) * Math.cos(longitude);
+            y += Math.cos(latitude) * Math.sin(longitude);
+            z += Math.sin(latitude);
+
+        }
+
+        x /= locationCount;
+        y /= locationCount;
+        z /= locationCount;
+
+        double centerLat = Math.atan2(y, x),
+                centerSqrt = Math.sqrt(x * x + y * y),
+                centerLong = Math.atan2(z, centerSqrt);
+
+        return new Location(centerLat * 180 / Math.PI, centerLong * 180 / Math.PI);
     }
 
 }
